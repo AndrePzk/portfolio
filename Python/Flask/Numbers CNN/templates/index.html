@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>CCN</title>
+    
+</head>
+<style>
+    body {
+        font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        letter-spacing: 0.05rem;
+        font-size: 1.5rem;
+            color: #525252;
+            font-weight: 200;
+    }
+
+    #drawCanvas {
+        cursor: crosshair;
+        background-color: #fff;
+        height: 250px;
+        width: 250px;
+        margin-right: 1rem;
+    }
+    .widget {
+        height: 25rem;
+        width: 65rem;
+        background-color: #f4f4f4;
+        padding: 1rem;
+        display: flex;
+    }
+
+    .widget_scr {
+        height: 23rem;
+        width: 33rem;
+        background-color: #161616;
+        padding: 2rem 0 0 2rem;
+        display: flex;
+    }
+
+    .widget_scr div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .widget_scr>div:last-child {
+        color: #fff;
+    } 
+
+    #ersr {
+        height: 5rem;
+        width: 250px;
+        background-color: #f4f4f4;
+        cursor: pointer;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-top: 1rem;
+        color: #525252;
+    }
+
+    #ersr:hover {
+        background-color: #c6c6c6;
+    }
+
+    .reslt {
+        height: 4rem;
+        width: 15rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 200;
+        
+    }
+
+    #show_res {
+        font-size: 5rem;
+        font-weight: 300;
+    }
+
+    #visu {
+        display: flex;
+        flex-direction: column;
+    }    
+
+    #visu>div:first-child {
+        height: 3rem;
+    }
+
+    #visu>div:last-child {
+        height: 20rem;
+        border-top: #a8a8a8 1px solid;
+        border-bottom: #a8a8a8 1px solid;
+        transform: scale(1, -1);
+    }
+
+    .vv {
+        display:flex;
+        width: 30rem;
+        margin-left: 1rem;
+        justify-content: space-evenly;
+    }
+
+    .vv div {
+        width: 0.7rem;
+    }
+
+    .bar_chart {
+        background-color: #525252;
+        height: 0%;
+        bottom: 0px;
+    }
+
+    #h0 {
+        height: {{ h0 }}%;
+    }
+    #h1 {
+        height: {{ h1 }}%;
+    }
+    #h2 {
+        height: {{ h2 }}%;
+    }
+    #h3 {
+        height: {{ h3 }}%;
+    }
+    #h4 {
+        height: {{ h4 }}%;
+    }
+    #h5 {
+        height: {{ h5 }}%;
+    }
+    #h6 {
+        height: {{ h6 }}%;
+    }
+    #h7 {
+        height: {{ h7 }}%;
+    }
+    #h8 {
+        height: {{ h8 }}%;
+    }
+    #h9 {
+        height: {{ h9 }}%;
+    }
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+<body>
+    <div class="widget">
+        <div class="widget_scr">
+            <div>
+            <canvas id="drawCanvas" width="250" height="250" style="border: 1px solid black"></canvas>
+            <div id="ersr" onclick="erase()">Effacer</div>
+            </div>
+            <div>
+                <p>c'est un :</p>
+                <div class="reslt" id="show_res">{{ result }}</div>
+                <p>certitude :</p>
+                <div class="reslt">{{ confidence }}</div>
+            </div>
+        </div>
+        <div id="visu">
+            <div class="vv">
+                <div>0</div>
+                <div>1</div>
+                <div>2</div>
+                <div>3</div>
+                <div>4</div>
+                <div>5</div>
+                <div>6</div>
+                <div>7</div>
+                <div>8</div>
+                <div>9</div>
+            </div>
+            <div class="vv">
+                <div class="bar_chart" id="h0"></div>
+                <div class="bar_chart" id="h1"></div>
+                <div class="bar_chart" id="h2"></div>
+                <div class="bar_chart" id="h3"></div>
+                <div class="bar_chart" id="h4"></div>
+                <div class="bar_chart" id="h5"></div>
+                <div class="bar_chart" id="h6"></div>
+                <div class="bar_chart" id="h7"></div>
+                <div class="bar_chart" id="h8"></div>
+                <div class="bar_chart" id="h9"></div>
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+    var x1 = 0,
+        x2 = 0,
+        y1 = 0,
+        y2 = 0,
+        flag = false,
+        dot_flag = false,
+        changed = false;
+
+    var matrix = {{ matrix }};
+
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+
+
+    function init() {
+
+        canvas.addEventListener('mousedown', function(e) {
+            xy('down', e);
+        }, false);
+        canvas.addEventListener('mousemove', function(e) {
+            xy('move', e);
+        }, false);
+        canvas.addEventListener('mouseout', function(e) {
+            xy('out', e);
+        }, false);
+        canvas.addEventListener('mouseup', function(e) {
+            xy('up', e);
+        }, false);
+
+        for (i=0; i<28; i++) {
+            for (j=0; j<28; j++) {
+                if (matrix[i][j] == 0.7) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#000';
+                    ctx.fillRect(j*10, i*10, 10, 10);
+                    ctx.closePath();
+                }
+            }
+        }
+    }
+
+    function xy(a, e) {
+
+        if (a == 'down') {
+            x1 = x2;
+            y1 = y2;
+            x2 = e.clientX - canvas.offsetLeft - 5;
+            y2 = e.clientY - canvas.offsetTop - 5;
+
+            flag = true;
+            dot_flag = true;
+            if (dot_flag) {
+                dot();
+                dot_flag = false;
+            }
+        }
+        if (a == 'up' || a == "out") {
+            flag = false;
+            if (changed) {
+            changed = false;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                url: "/predict",
+                traditional: "true",
+                data: JSON.stringify({matrix}),
+                dataType: "json"
+                });
+                setTimeout(update, 1000);
+            }
+        }
+        if (a == 'move') {
+
+            if (flag) {
+                x1 = x2;
+                y1 = y2;
+                x2 = e.clientX - canvas.offsetLeft - 5;
+                y2 = e.clientY - canvas.offsetTop - 5;
+                dot();
+                
+            }
+        }
+    }
+
+    function update() {
+        window.location.href = "/";
+    }
+
+    function dot() {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.fillRect(x2, y2, 10, 10);
+        ctx.closePath();
+       
+        for (i = 0; i < 2; i++) {
+            for (j = 0; j < 2; j++) {
+                matrix[parseInt((y2 + 5) / 10) + i][parseInt((x2 + 5) / 10) + j] = 0.7;
+            }
+        }
+        
+        changed = true;
+    }
+
+    function erase() {
+        ctx.clearRect(0, 0, 280, 280);
+        for (i = 0; i < 28; i++) {
+            matrix[i] = new Array(28).fill(0)
+        }
+        changed = false;
+    }
+
+    window.addEventListener("load", init());
+</script>
+
+</html>
